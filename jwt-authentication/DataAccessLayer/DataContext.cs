@@ -9,6 +9,11 @@ namespace jwt_authentication.DataAccessLayer
 {
     public class DataContext: DbContext
     {
+        public DataContext(DbContextOptions options) : base(options)
+        {
+
+        }
+
         public DbSet<AppUser> Users { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

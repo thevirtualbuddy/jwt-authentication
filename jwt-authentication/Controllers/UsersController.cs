@@ -51,6 +51,27 @@ namespace jwt_authentication.Controllers
             return user;
         }
 
+        [HttpPost("login")]
+        public async Task<ActionResult<AppUser>> Login(LoginUserDTO loginDTO)
+        {
+            var user = await _context.Users.
+                SingleOrDefaultAsync(u => u.UserName == loginDTO.Username);
+
+            if (user == null) return Unauthorized("Invalid Username");
+
+            // Using the same salt that was used as key at the time of register 
+            using var hmac = new HMACSHA512(user.PasswordSalt);
+
+            // Compute the hash and check if the hash is same as stored in the db
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDTO.Password));
+
+            for (int i = 0; i < computedHash.Length; i++)
+            {
+                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid Password");
+            }
+            return user;
+        }
+
         private async Task<bool> UserExists(string username)
         {
             return await _context.Users.AnyAsync(u => u.UserName == username.ToLower());

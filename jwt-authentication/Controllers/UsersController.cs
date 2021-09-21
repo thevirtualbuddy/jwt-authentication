@@ -2,6 +2,7 @@
 using jwt_authentication.DataAccessLayer;
 using jwt_authentication.DTO;
 using jwt_authentication.Entities;
+using jwt_authentication.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,8 +20,10 @@ namespace jwt_authentication.Controllers
     public class UsersController : ControllerBase
     {
         private readonly DataContext _context;
-        public UsersController(DataContext context)
+        private readonly ITokenService _tokenService;
+        public UsersController(DataContext context, ITokenService tokenService)
         {
+            _tokenService = tokenService;
             _context = context;
         }
 
@@ -31,7 +34,7 @@ namespace jwt_authentication.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AppUser>> Register(RegisterUserDTO registerUser)
+        public async Task<ActionResult<UserDTO>> Register(RegisterUserDTO registerUser)
         {
             //Check if user exists
             //If we use ActionResult we are able to return different http status codes as response
@@ -48,11 +51,15 @@ namespace jwt_authentication.Controllers
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return user;
+            return new UserDTO
+            {
+                Username = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AppUser>> Login(LoginUserDTO loginDTO)
+        public async Task<ActionResult<UserDTO>> Login(LoginUserDTO loginDTO)
         {
             var user = await _context.Users.
                 SingleOrDefaultAsync(u => u.UserName == loginDTO.Username);
@@ -69,7 +76,11 @@ namespace jwt_authentication.Controllers
             {
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid Password");
             }
-            return user;
+            return new UserDTO
+            {
+                Username = user.UserName,
+                Token = _tokenService.CreateToken(user)
+            };
         }
 
         private async Task<bool> UserExists(string username)

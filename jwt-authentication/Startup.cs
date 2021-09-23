@@ -39,7 +39,7 @@ namespace jwt_authentication
 
             services.AddDbContext<DataContext>();
             services.AddControllers();
-
+            services.AddSwaggerGen();
             // Add service for our authentication 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -73,6 +73,11 @@ namespace jwt_authentication
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "thevirtualbuddy-authentication");
             });
         }
     }

@@ -31,6 +31,7 @@ namespace jwt_authentication.Controllers
         }
 
         // Testing to fetch user anonymously
+        // This method should not be public; this is for understanding the difference between Authorize and Anonymous attrib
         [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers()

@@ -40,7 +40,7 @@ namespace jwt_authentication.Controllers
 
         [Authorize]
         [HttpGet("{id}")]
-        public async Task<ActionResult<AppUser>> GetUsers(int id)
+        public async Task<ActionResult<AppUser>> GetUser(int id)
         {
             return await _context.Users.FindAsync(id);
         }
